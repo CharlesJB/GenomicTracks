@@ -4,7 +4,7 @@
 \alias{gtracks}
 \title{Produce genomic tracks}
 \usage{
-gtracks(region, bam_files, ranges = NULL, annotation = NULL)
+gtracks(region, bam_files, ranges = NULL, annotation = NULL, org = NULL)
 }
 \arguments{
 \item{region}{A \code{GRanges} representing the region to display.}
@@ -21,7 +21,10 @@ annotations to add to the display. The names of the elements
 of the \code{list}/\code{GRangesList} will be used for the
    displayed tracks.}
 
-\item{annotation}{A \code{TxDb} object to use for annotation.}
+\item{annotation}{A \code{TxDb} object to use for annotation must be used
+\code{org} param.}
+
+\item{org}{The \code{OrgDb} object matching the \code{annotation}.}
 }
 \value{
 A \code{ggbio::Tracks} object.

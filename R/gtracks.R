@@ -16,7 +16,9 @@
 #'               annotations to add to the display. The names of the elements
 #'               of the \code{list}/\code{GRangesList} will be used for the
 #'                  displayed tracks.
-#' @param annotation A \code{TxDb} object to use for annotation.
+#' @param annotation A \code{TxDb} object to use for annotation must be used
+#'                   \code{org} param.
+#' @param org The \code{OrgDb} object matching the \code{annotation}.
 #'
 #' @return A \code{ggbio::Tracks} object.
 #'
@@ -31,6 +33,48 @@
 #' @import metagene
 #'
 #' @export
-gtracks <- function(region, bam_files, ranges = NULL, annotation = NULL) {
+gtracks <- function(region, bam_files, ranges = NULL, annotation = NULL, org = NULL) {
+    # Validate params
+    stopifnot(class(region) == "GRanges")
+    stopifnot(length(region == 1))
+    if (!is.null(ranges)) {
+        stopifnot(class(ranges) == "list" | class(ranges == "GRangesList"))
+        if (class(ranges) == "list") {
+            stopifnot(all(lapply(ranges, function(x) class(x) == "GRanges")))
+        }
+    }
+    if (!is.null(annotation)) {
+        stopifnot(class(annotation) == "TxDb")
+        stopifnot(class(org) == "OrgDb")
+    }
 
+    # Extract coverages
+    mg <- metagene$new(regions = region, bam_files = bam_files)
+    coverages <- mg$get_raw_coverages()
+    names(coverages) <- names(bam_files)
+    get_cov_df <- function(cov) {
+        current_cov <- cov[gr][[1]]
+        pos <- seq(start(gr), end(gr))
+        data.frame(position = pos, coverage = as.numeric(current_cov))
+    }
+    df_coverages <- lapply(coverages, get_cov_df)
+
+    # Crunch annotation
+    gr_anno <- crunch(txdb, which = resize(region, 100000, fix = "center"))
+    symbols <- select(org, keys = as.character(mcols(gr_anno)[["gene_id"]]),
+                      column = "SYMBOL", keytype = "ENTREZID")[["SYMBOL"]]
+    mcols(gr_anno)[["symbols"]] <- symbols
+    i <- mcols(gr_anno)[["type"]] == "gap"
+    gr_anno <- gr_anno[!i]
+    levels(gr_anno) <- c("cds", "exon", "utr")
+    grl_anno <- split(gr_anno, mcols(gr_anno)[["symbols"]])
+
+    # Prepare tracks
+    tracks_coverages <- lapply(df_coverages, function(x) {
+                                   ggplot(x, aes(x = position, y = coverage)) +
+                                       geom_line() + theme_bw()
+                               })
+    tracks_custom <- lapply(ranges, function(x) autoplot(x) + theme_bw())
+    track_anno <- autoplot(grl_anno, aes(type = type)) + theme_bw() + xlim(region)
+    tracks(c(tracks_coverages, tracks_custom, Annotation = track_anno)) + xlim(region)
 }
