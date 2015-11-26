@@ -81,13 +81,13 @@ gtracks <- function(region, bam_files, ranges = NULL, annotation = NULL, org = N
                                        ggplot2::geom_line() + ggplot2::theme_bw()
                                })
     if (!is.null(ranges)) {
-        all_tracks <- c(all_tracks, lapply(ranges, function(x) autoplot(x) +
-                                           theme_bw()))
+        all_tracks <- c(all_tracks, lapply(ranges, function(x) ggbio::autoplot(x) +
+                                           ggplot2::theme_bw()))
     }
     if (!is.null(annotation)) {
         all_tracks <- c(all_tracks,
-                        Annotation = autoplot(grl_anno, aes(type = type)) +
-                                         theme_bw() + xlim(region))
+                        Annotation = ggbio::autoplot(grl_anno, ggplot2::aes(type = type)) +
+                                         ggplot2::theme_bw() + ggbio::xlim(region))
     }
-    tracks(all_tracks) + xlim(region)
+    tracks(all_tracks) + ggbio::xlim(region)
 }
