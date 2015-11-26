@@ -77,7 +77,7 @@ gtracks <- function(region, bam_files, ranges = NULL, annotation = NULL, org = N
 
     # Prepare tracks
     all_tracks <- lapply(df_coverages, function(x) {
-                         ggplot2::ggplot(x, ggplo2::aes(x = position, y = coverage)) +
+                         ggplot2::ggplot(x, ggplot2::aes(x = position, y = coverage)) +
                                        ggplot2::geom_line() + ggplot2::theme_bw()
                                })
     if (!is.null(ranges)) {

@@ -1,6 +1,6 @@
 Package: GenomicTracks
 Title: Easily build genomic tracks
-Version: 0.0.4
+Version: 0.0.5
 Authors@R: person("Charles", "Joly Beauparlant",
     email = "Charles.Joly-Beauparlant@crchul.ulaval.ca", role = c("aut", "cre"))
 Description: This packages uses GenomicRanges, GenomicAlignments and ggbio to
