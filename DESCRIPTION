@@ -1,6 +1,6 @@
 Package: GenomicTracks
 Title: Easily build genomic tracks
-Version: 0.0.2
+Version: 0.0.3
 Authors@R: person("Charles", "Joly Beauparlant",
     email = "Charles.Joly-Beauparlant@crchul.ulaval.ca", role = c("aut", "cre"))
 Description: This packages uses GenomicRanges, GenomicAlignments and ggbio to
@@ -12,7 +12,6 @@ License: Artistic-2.0
 LazyData: true
 Imports:
     ggbio,
-    ggplot2,
     biovizBase,
     tools,
     GenomicAlignments

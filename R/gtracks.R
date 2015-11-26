@@ -29,7 +29,6 @@
 #' gtracks(region = region, bam_files = bam_files)
 #'
 #' @import ggbio
-#' @import ggplot2
 #' @import tools
 #' @import GenomicAlignments
 #'
@@ -63,7 +62,8 @@ gtracks <- function(region, bam_files, ranges = NULL, annotation = NULL, org = N
     # Crunch annotation
     grl_anno <- GRangesList()
     if (!is.null(annotation)) {
-        gr_anno <- crunch(annotation, which = resize(region, 100000, fix = "center"))
+        gr_anno <- crunch(annotation, which = resize(region, 100000,
+                                                     fix = "center"))
         symbols <- select(org, keys = as.character(mcols(gr_anno)[["gene_id"]]),
                           column = "SYMBOL", keytype = "ENTREZID")[["SYMBOL"]]
         mcols(gr_anno)[["symbols"]] <- symbols
@@ -75,15 +75,17 @@ gtracks <- function(region, bam_files, ranges = NULL, annotation = NULL, org = N
 
     # Prepare tracks
     all_tracks <- lapply(df_coverages, function(x) {
-                                   ggplot(x, aes(x = position, y = coverage)) +
-                                       geom_line() + theme_bw()
+                         ggplot2::ggplot(x, ggplo2::aes(x = position, y = coverage)) +
+                                       ggplot2::geom_line() + ggplot2::theme_bw()
                                })
     if (!is.null(ranges)) {
-        all_tracks <- c(all_tracks, lapply(ranges, function(x) autoplot(x) + theme_bw()))
+        all_tracks <- c(all_tracks, lapply(ranges, function(x) autoplot(x) +
+                                           theme_bw()))
     }
     if (!is.null(annotation)) {
         all_tracks <- c(all_tracks,
-                        autoplot(grl_anno, aes(type = type)) + theme_bw() + xlim(region))
+                        Annotation = autoplot(grl_anno, aes(type = type)) +
+                                         theme_bw() + xlim(region))
     }
     tracks(all_tracks) + xlim(region)
 }

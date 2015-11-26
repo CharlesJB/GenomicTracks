@@ -3,5 +3,4 @@
 export(gtracks)
 import(GenomicAlignments)
 import(ggbio)
-import(ggplot2)
 import(tools)
