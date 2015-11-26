@@ -1,4 +1,4 @@
-Package: tracks
+Package: GenomicTracks
 Title: Easily build genomic tracks
 Version: 0.0.1
 Authors@R: person("Charles", "Joly Beauparlant",
@@ -6,10 +6,12 @@ Authors@R: person("Charles", "Joly Beauparlant",
 Description: This packages uses GenomicRanges, GenomicAlignments and ggbio to
     create tracks of a selected regions. It takes as input a list of bam files,
     a genomic region in GRanges format and (optionnaly) an annotation.
-Depends: R (>= 3.2.2)
+Depends:
+    R (>= 3.2.2)
 License: Artistic-2.0
 LazyData: true
 Imports:
     ggbio,
-    GenomicAlignments,
+    tools,
     metagene
+RoxygenNote: 5.0.1
