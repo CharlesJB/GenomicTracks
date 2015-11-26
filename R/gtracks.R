@@ -29,14 +29,15 @@
 #' gtracks(region = region, bam_files = bam_files)
 #'
 #' @import ggbio
+#' @import ggplot2
 #' @import tools
-#' @import metagene
+#' @import GenomicAlignments
 #'
 #' @export
 gtracks <- function(region, bam_files, ranges = NULL, annotation = NULL, org = NULL) {
     # Validate params
     stopifnot(class(region) == "GRanges")
-    stopifnot(length(region == 1))
+    stopifnot(length(region) == 1)
     if (!is.null(ranges)) {
         stopifnot(class(ranges) == "list" | class(ranges == "GRangesList"))
         if (class(ranges) == "list") {
@@ -49,32 +50,40 @@ gtracks <- function(region, bam_files, ranges = NULL, annotation = NULL, org = N
     }
 
     # Extract coverages
-    mg <- metagene$new(regions = region, bam_files = bam_files)
-    coverages <- mg$get_raw_coverages()
-    names(coverages) <- names(bam_files)
+    param <- ScanBamParam(which = region)
+    align <- lapply(bam_files, readGAlignments, param = param)
+    coverages <- lapply(align, coverage)
     get_cov_df <- function(cov) {
-        current_cov <- cov[gr][[1]]
-        pos <- seq(start(gr), end(gr))
+        current_cov <- cov[region][[1]]
+        pos <- seq(start(region), end(region))
         data.frame(position = pos, coverage = as.numeric(current_cov))
     }
     df_coverages <- lapply(coverages, get_cov_df)
 
     # Crunch annotation
-    gr_anno <- crunch(txdb, which = resize(region, 100000, fix = "center"))
-    symbols <- select(org, keys = as.character(mcols(gr_anno)[["gene_id"]]),
-                      column = "SYMBOL", keytype = "ENTREZID")[["SYMBOL"]]
-    mcols(gr_anno)[["symbols"]] <- symbols
-    i <- mcols(gr_anno)[["type"]] == "gap"
-    gr_anno <- gr_anno[!i]
-    levels(gr_anno) <- c("cds", "exon", "utr")
-    grl_anno <- split(gr_anno, mcols(gr_anno)[["symbols"]])
+    grl_anno <- GRangesList()
+    if (!is.null(annotation)) {
+        gr_anno <- crunch(annotation, which = resize(region, 100000, fix = "center"))
+        symbols <- select(org, keys = as.character(mcols(gr_anno)[["gene_id"]]),
+                          column = "SYMBOL", keytype = "ENTREZID")[["SYMBOL"]]
+        mcols(gr_anno)[["symbols"]] <- symbols
+        i <- mcols(gr_anno)[["type"]] == "gap"
+        gr_anno <- gr_anno[!i]
+        levels(gr_anno) <- c("cds", "exon", "utr")
+        grl_anno <- split(gr_anno, mcols(gr_anno)[["symbols"]])
+    }
 
     # Prepare tracks
-    tracks_coverages <- lapply(df_coverages, function(x) {
+    all_tracks <- lapply(df_coverages, function(x) {
                                    ggplot(x, aes(x = position, y = coverage)) +
                                        geom_line() + theme_bw()
                                })
-    tracks_custom <- lapply(ranges, function(x) autoplot(x) + theme_bw())
-    track_anno <- autoplot(grl_anno, aes(type = type)) + theme_bw() + xlim(region)
-    tracks(c(tracks_coverages, tracks_custom, Annotation = track_anno)) + xlim(region)
+    if (!is.null(ranges)) {
+        all_tracks <- c(all_tracks, lapply(ranges, function(x) autoplot(x) + theme_bw()))
+    }
+    if (!is.null(annotation)) {
+        all_tracks <- c(all_tracks,
+                        autoplot(grl_anno, aes(type = type)) + theme_bw() + xlim(region))
+    }
+    tracks(all_tracks) + xlim(region)
 }

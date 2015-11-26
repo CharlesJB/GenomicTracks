@@ -12,6 +12,8 @@ License: Artistic-2.0
 LazyData: true
 Imports:
     ggbio,
+    ggplot2,
+    biovizBase,
     tools,
-    metagene
+    GenomicAlignments
 RoxygenNote: 5.0.1
