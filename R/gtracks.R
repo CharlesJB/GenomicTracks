@@ -29,8 +29,10 @@
 #' gtracks(region = region, bam_files = bam_files)
 #'
 #' @import ggbio
+#' @import biovizBase
 #' @import tools
 #' @import GenomicAlignments
+#' @import Rsamtools
 #'
 #' @export
 gtracks <- function(region, bam_files, ranges = NULL, annotation = NULL, org = NULL) {
@@ -70,7 +72,7 @@ gtracks <- function(region, bam_files, ranges = NULL, annotation = NULL, org = N
         i <- mcols(gr_anno)[["type"]] == "gap"
         gr_anno <- gr_anno[!i]
         levels(gr_anno) <- c("cds", "exon", "utr")
-        grl_anno <- split(gr_anno, mcols(gr_anno)[["symbols"]])
+        grl_anno <- GRangesList(split(gr_anno, mcols(gr_anno)[["symbols"]]))
     }
 
     # Prepare tracks
