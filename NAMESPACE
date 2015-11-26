@@ -2,5 +2,7 @@
 
 export(gtracks)
 import(GenomicAlignments)
+import(Rsamtools)
+import(biovizBase)
 import(ggbio)
 import(tools)
